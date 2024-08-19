@@ -3,6 +3,7 @@ using ScreenSound.API.Requests;
 using ScreenSound.API.Response;
 using ScreenSound.Banco;
 using ScreenSound.Modelos;
+using ScreenSound.Shared.Modelos.Modelos;
 
 namespace ScreenSound.API.Endpoints;
 
@@ -27,16 +28,16 @@ public static class MusicasExtensions
             }
             return Results.Ok(musica);
         });
-        app.MapPost("/Musicas", ([FromServices] DAL<Musica> dalMusica, [FromBody] MusicaRequest musicaRequest) =>
+        app.MapPost("/Musicas", ([FromServices] DAL<Musica> dal, [FromBody] MusicaRequest musicaRequest) =>
         {
-            //var context = new ScreenSoundContext();
-            //var dalArtista = new DAL<Artista>(context);
-            var musica = new Musica(musicaRequest.Nome);
-            //musica.Artista = dalArtista.RecuperarPor(a => a.Id.Equals(musicaRequest.ArtistaID));
-            musica.AnoLancamento = musicaRequest.AnoLancamento;
-            dalMusica.Adicionar(musica);
-            return Results.Created();
-        });
+            var musica = new Musica(musicaRequest.Nome)
+            {
+                ArtistaId = musicaRequest.ArtistaID,
+                AnoLancamento = musicaRequest.AnoLancamento,
+                Generos = musicaRequest.Generos is not null ? GeneroRequestConverter(musicaRequest.Generos) : new List<Genero>()
+            };
+            dal.Adicionar(musica);
+            return Results.Created();});
 
         app.MapDelete("/Musicas/{id}", ([FromServices] DAL<Musica> dal, int id) =>
         {
@@ -72,5 +73,14 @@ public static class MusicasExtensions
     private static MusicaResponse EntityToResponse(Musica musica)
     {
         return new MusicaResponse(musica.Id, musica.Nome!, musica.Artista!.Id, musica.Artista.Nome);
+    }
+    private static ICollection<Genero> GeneroRequestConverter(ICollection<GeneroRequest> generos)
+    {
+        return generos.Select(a => RequestToEntity(a)).ToList();
+    }
+
+    private static Genero RequestToEntity(GeneroRequest genero)
+    {
+        return new Genero() { Nome = genero.Nome, Descricao = genero.Descricao};
     }
 }

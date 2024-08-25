@@ -17,8 +17,16 @@ public class ScreenSoundContext: DbContext
 
     private string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ScreenSoundV0;Integrated Security=True;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
 
+    public ScreenSoundContext(DbContextOptions options) : base(options)
+    {
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        if (optionsBuilder.IsConfigured)
+        {
+            return;
+        }
         optionsBuilder
             .UseSqlServer(connectionString)
             .UseLazyLoadingProxies();

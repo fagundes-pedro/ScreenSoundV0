@@ -21,7 +21,7 @@ public static class GenerosExtensions
             var genero = listaGeneros.Where(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
             if (genero is null)
             {
-                return Results.NotFound();
+                return Results.NotFound("Gênero não encontrado.");
             }
             return Results.Ok(genero);
         });
@@ -39,7 +39,7 @@ public static class GenerosExtensions
             var genero = dal.RecuperarPor(g => g.Id.Equals(id));
             if (genero is null)
             {
-                return Results.NotFound();
+                return Results.NotFound("Gênero não encontrado.");
             }
             dal.Deletar(genero);
             return Results.NoContent();

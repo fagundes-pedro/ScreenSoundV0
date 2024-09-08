@@ -12,45 +12,49 @@ public static class GenerosExtensions
     public static void AddEndPointGeneros (this WebApplication app)
     {
         #region Endpoint Genero
-        app.MapGet("/Generos", ([FromServices] DAL<Genero> dal) => {
-            var listaGeneros = EntityListToResponseList(dal.Listar());
-            return Results.Ok(listaGeneros);
+        app.MapGet("/Generos", async ([FromServices] DAL<Genero> dal) => {
+            var listaGeneros = await dal.ListarAsync();
+            return Results.Ok(EntityListToResponseList(listaGeneros));
         });
-        app.MapGet("/Generos/{nome}", ([FromServices] DAL<Genero> dal, string nome) => {
-            var listaGeneros = EntityListToResponseList(dal.Listar());
-            var genero = listaGeneros.Where(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
+        app.MapGet("/Generos/{nome}", async ([FromServices] DAL<Genero> dal, string nome) => {
+            var listaGeneros = await dal.ListarAsync();
+            var genero = listaGeneros.FirstOrDefault(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
             if (genero is null)
             {
                 return Results.NotFound("Gênero não encontrado.");
             }
-            return Results.Ok(genero);
+            return Results.Ok(EntityToResponse(genero));
         });
-        app.MapPost("/Generos", ([FromServices] DAL<Genero> dal, [FromBody] GeneroRequest generoRequest) =>
+        app.MapPost("/Generos", async ([FromServices] DAL<Genero> dal, [FromBody] GeneroRequest generoRequest) =>
         {
-            var genero = new Genero(generoRequest.Nome)
+            if (string.IsNullOrWhiteSpace(generoRequest.Nome))
             {
-                Descricao = generoRequest.Descricao
-            };
-            dal.Adicionar(genero);
-            return Results.Created();
+                return Results.BadRequest("Nome do gênero é obrigatório");
+            }
+            var genero = RequestToEntity(generoRequest);
+            await dal.AdicionarAsync(genero);
+            return Results.Created($"/Generos/{genero.Id}", EntityToResponse(genero));
         });
-        app.MapDelete("/Generos", ([FromServices] DAL<Genero> dal, int id) =>
+        app.MapDelete("/Generos", async ([FromServices] DAL<Genero> dal, int id) =>
         {
-            var genero = dal.RecuperarPor(g => g.Id.Equals(id));
+            var genero = await dal.RecuperarPorAsync(g => g.Id.Equals(id));
             if (genero is null)
             {
                 return Results.NotFound("Gênero não encontrado.");
             }
-            dal.Deletar(genero);
+            await dal.DeletarAsync(genero);
             return Results.NoContent();
         });
         #endregion
+    }
+    private static Genero RequestToEntity(GeneroRequest generoRequest)
+    {
+        return new Genero(generoRequest.Nome) { Descricao = generoRequest.Descricao };
     }
     private static ICollection<GeneroResponse> EntityListToResponseList(IEnumerable<Genero> listaDeGeneros)
     {
         return listaDeGeneros.Select(g => EntityToResponse(g)).ToList();
     }
-
     private static GeneroResponse EntityToResponse(Genero genero)
     {
         return new GeneroResponse(genero.Id, genero.Nome!, genero.Descricao);

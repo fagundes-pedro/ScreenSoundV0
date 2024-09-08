@@ -11,44 +11,44 @@ public static class ArtistasExtensions
     public static void AddEndPointArtistas (this WebApplication app)
     {
         #region Endpoint Artistas
-        app.MapGet("/Artistas", ([FromServices] DAL<Artista> dal) =>
+        app.MapGet("/Artistas", async ([FromServices] DAL<Artista> dal) =>
         {
-            var listaArtistas = EntityListToResponseList(dal.Listar());
-            return Results.Ok(listaArtistas);
+            var listaArtistas = await dal.ListarAsync();
+            return Results.Ok(EntityListToResponseList(listaArtistas));
         });
 
-        app.MapGet("/Artistas/{nome}", ([FromServices] DAL<Artista> dal, string nome) =>
+        app.MapGet("/Artistas/{nome}", async ([FromServices] DAL<Artista> dal, string nome) =>
         {
-            var listaArtistas = EntityListToResponseList(dal.Listar());
-            var artista = listaArtistas.Where(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
+            var listaArtistas = await dal.ListarAsync();
+            var artista = listaArtistas.FirstOrDefault(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
             if (artista is null)
             {
                 return Results.NotFound();
             }
-            return Results.Ok(artista);
+            return Results.Ok(EntityToResponse(artista));
         });
 
-        app.MapPost("/Artistas", ([FromServices] DAL<Artista> dal, [FromBody] ArtistaRequest artistaRequest) =>
+        app.MapPost("/Artistas", async ([FromServices] DAL<Artista> dal, [FromBody] ArtistaRequest artistaRequest) =>
         {
             var artista = new Artista(artistaRequest.Nome, artistaRequest.Bio);
-            dal.Adicionar(artista);
+            await dal.AdicionarAsync(artista);
             return Results.Created();
         });
 
-        app.MapDelete("/Artistas/{id}", ([FromServices] DAL<Artista> dal, int id) =>
+        app.MapDelete("/Artistas/{id}", async ([FromServices] DAL<Artista> dal, int id) =>
         {
-            var artista = dal.RecuperarPor(a => a.Id.Equals(id));
+            var artista = await dal.RecuperarPorAsync(a => a.Id.Equals(id));
             if (artista is null)
             {
                 return Results.NotFound();
             }
-            dal.Deletar(artista);
+            await dal.DeletarAsync(artista);
             return Results.NoContent();
         });
 
-        app.MapPut("/Artistas", ([FromServices] DAL<Artista> dal, [FromBody] ArtistaRequestEdit artista) =>
+        app.MapPut("/Artistas", async ([FromServices] DAL<Artista> dal, [FromBody] ArtistaRequestEdit artista) =>
         {
-            var artistaAAlterar = dal.RecuperarPor(a => a.Id.Equals(artista.Id));
+            var artistaAAlterar = await dal.RecuperarPorAsync(a => a.Id.Equals(artista.Id));
             if (artistaAAlterar is null)
             {
                 return Results.NotFound();
@@ -56,7 +56,7 @@ public static class ArtistasExtensions
             artistaAAlterar.Nome = artista.Nome;
             artistaAAlterar.Bio = artista.Bio;
             artistaAAlterar.FotoPerfil = artista.FotoPerfil;
-            dal.Atualizar(artistaAAlterar);
+            await dal.AtualizarAsync(artistaAAlterar);
             return Results.Ok();
         });
         #endregion

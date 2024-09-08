@@ -12,23 +12,23 @@ public static class MusicasExtensions
     public static void AddEndPointMusicas(this WebApplication app)
     {
         #region Endpoint Musicas
-        app.MapGet("/Musicas", ([FromServices] DAL<Musica> dal) =>
+        app.MapGet("/Musicas", async ([FromServices] DAL<Musica> dal) =>
         {
-            var listaMusicas = EntityListToResponseList(dal.Listar());
-            return Results.Ok(listaMusicas);
+            var listaMusicas = await dal.ListarAsync();
+            return Results.Ok(EntityListToResponseList(listaMusicas));
         });
 
-        app.MapGet("/Musicas/{nome}", ([FromServices] DAL<Musica> dal, string nome) =>
+        app.MapGet("/Musicas/{nome}", async ([FromServices] DAL<Musica> dal, string nome) =>
         {
-            var listaMusicas = EntityListToResponseList(dal.Listar());
-            var musica = listaMusicas.Where(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
+            var listaMusicas = await dal.ListarAsync();
+            var musica = listaMusicas.FirstOrDefault(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
             if (musica is null)
             {
                 return Results.NotFound();
             }
-            return Results.Ok(musica);
+            return Results.Ok(EntityToResponse(musica));
         });
-        app.MapPost("/Musicas", ([FromServices] DAL<Musica> dalMusica, [FromServices] DAL<Genero> dalGenero, [FromBody] MusicaRequest musicaRequest) =>
+        app.MapPost("/Musicas", async ([FromServices] DAL<Musica> dalMusica, [FromServices] DAL<Genero> dalGenero, [FromBody] MusicaRequest musicaRequest) =>
         {
             var musica = new Musica(musicaRequest.Nome)
             {
@@ -36,33 +36,33 @@ public static class MusicasExtensions
                 AnoLancamento = musicaRequest.AnoLancamento,
                 Generos = musicaRequest.Generos is not null ? GeneroRequestConverter(musicaRequest.Generos, dalGenero) : new List<Genero>()
             };
-            dalMusica.Adicionar(musica);
+            await dalMusica.AdicionarAsync(musica);
             return Results.Created();
         });
 
-        app.MapDelete("/Musicas/{id}", ([FromServices] DAL<Musica> dal, int id) =>
+        app.MapDelete("/Musicas/{id}", async ([FromServices] DAL<Musica> dal, int id) =>
         {
-            var musica = dal.RecuperarPor(a => a.Id.Equals(id));
+            var musica = await dal.RecuperarPorAsync(a => a.Id.Equals(id));
             if (musica is null)
             {
-                return Results.NotFound();
+                return Results.NotFound("Musica não encontrada");
             }
-            dal.Deletar(musica);
+            await dal.DeletarAsync(musica);
             return Results.NoContent();
         });
 
-        app.MapPut("/Musicas", ([FromServices] DAL<Musica> dal, [FromBody] MusicaRequestEdit musica) =>
+        app.MapPut("/Musicas", async ([FromServices] DAL<Musica> dal, [FromBody] MusicaRequestEdit musica) =>
         {
-            var musicaAAlterar = dal.RecuperarPor(a => a.Id.Equals(musica.Id));
+            var musicaAAlterar = await dal.RecuperarPorAsync(a => a.Id.Equals(musica.Id));
             if (musicaAAlterar is null)
             {
-                return Results.NotFound();
+                return Results.NotFound("Musica não encontrada");
             }
             musicaAAlterar.Nome = musica.Nome;
             musicaAAlterar.AnoLancamento = musica.AnoLancamento;
             musicaAAlterar.ArtistaId = musica.ArtistaId;
 
-            dal.Atualizar(musicaAAlterar);
+            await dal.AtualizarAsync(musicaAAlterar);
             return Results.Ok();
         });
         #endregion

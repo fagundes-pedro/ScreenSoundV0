@@ -10,6 +10,8 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors();
+
 builder.Services.AddDbContext<ScreenSoundContext>((options) =>
 {
     options
@@ -29,6 +31,12 @@ var app = builder.Build();
 app.AddEndPointArtistas();
 app.AddEndPointMusicas();
 app.AddEndPointGeneros();
+
+app.UseCors(x => x
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .SetIsOriginAllowed(origin => true)
+    .AllowCredentials());
 
 app.UseSwagger();
 app.UseSwaggerUI();

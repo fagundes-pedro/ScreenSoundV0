@@ -32,11 +32,7 @@ app.AddEndPointArtistas();
 app.AddEndPointMusicas();
 app.AddEndPointGeneros();
 
-app.UseCors(x => x
-    .AllowAnyMethod()
-    .AllowAnyHeader()
-    .SetIsOriginAllowed(origin => true)
-    .AllowCredentials());
+app.UseCors(x => x.AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true).AllowCredentials());
 
 app.UseSwagger();
 app.UseSwaggerUI();

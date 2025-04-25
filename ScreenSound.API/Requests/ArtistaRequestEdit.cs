@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace ScreenSound.API.Requests;
 
-namespace ScreenSound.API.Requests;
-
-public record ArtistaRequestEdit([Required] string Nome, string Bio, string FotoPerfil, [Required] int Id);
+public record ArtistaRequestEdit(int Id,string nome,string bio,string? fotoPerfil)
+    : ArtistaRequest(nome,bio,fotoPerfil);

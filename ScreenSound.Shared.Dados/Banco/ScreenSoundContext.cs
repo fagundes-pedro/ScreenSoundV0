@@ -17,8 +17,13 @@ public class ScreenSoundContext: DbContext
 
     private string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ScreenSoundV0;Integrated Security=True;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
 
+    public ScreenSoundContext()
+    {
+        
+    }
     public ScreenSoundContext(DbContextOptions options) : base(options)
     {
+
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -31,8 +36,13 @@ public class ScreenSoundContext: DbContext
             .UseSqlServer(connectionString)
             .UseLazyLoadingProxies();
     }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Musica>().HasMany(c => c.Generos).WithMany(c => c.Musicas);
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Musica>()
+            .HasMany(c => c.Generos)
+            .WithMany(c => c.Musicas);
     }
+
 }

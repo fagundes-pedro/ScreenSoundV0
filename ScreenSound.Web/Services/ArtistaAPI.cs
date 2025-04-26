@@ -15,25 +15,25 @@ public class ArtistaAPI
 
     public async Task<ICollection<ArtistaResponse>?> GetArtistasAsync()
     {
-        return await _httpClient.GetFromJsonAsync<ICollection<ArtistaResponse>>("artistas");
+        return await _httpClient.GetFromJsonAsync<ICollection<ArtistaResponse>>("Artistas");
     }
 
     public async Task AddArtistaAsync(ArtistaRequest artista)
     {
-        await _httpClient.PostAsJsonAsync("artistas", artista);
+        await _httpClient.PostAsJsonAsync("Artistas", artista);
     }
 
     public async Task<ArtistaResponse?> GetArtistaPorNomeAsync(string nome)
     {
-        return await _httpClient.GetFromJsonAsync<ArtistaResponse>($"artistas/{nome}");
+        return await _httpClient.GetFromJsonAsync<ArtistaResponse>($"Artistas/{nome}");
     }
     public async Task DeleteArtistaAsync(int id)
     {
-        await _httpClient.DeleteAsync($"artistas/{id}");
+        await _httpClient.DeleteAsync($"Artistas/{id}");
     }
 
     public async Task UpdateArtistaAsync(ArtistaRequestEdit artista)
     {        
-       await _httpClient.PutAsJsonAsync($"artistas", artista);
+       await _httpClient.PutAsJsonAsync($"Artistas", artista);
     }
 }

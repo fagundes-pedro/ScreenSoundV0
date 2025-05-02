@@ -1,6 +1,7 @@
 ﻿@page "/login"
 @inject NavigationManager navigationManager
 @inject AuthAPI AuthAPI
+@attribute [AllowAnonymous]
 
 <MudPaper Class="px-8 pt-2 pb-4 mx-16 my-8" Justify="Justify.Center">
 
@@ -28,18 +29,28 @@
             </MudForm>
         </NotAuthorized>
     </AuthorizeView>
-    
 
 
-    
+
+
 </MudPaper>
 
 @code {
     private string? email;
     private string? senha;
 
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
     private async Task FazerLogin()
     {
-        await AuthAPI.LoginAsync(email, senha);
+        var resposta = await AuthAPI.LoginAsync(email, senha);
+        if (resposta.Success)
+        {
+            if (ReturnUrl is not null)
+            {
+                navigationManager.NavigateTo(ReturnUrl);
+            }
+        }
     }
 }

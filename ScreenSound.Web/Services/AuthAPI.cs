@@ -35,13 +35,18 @@ public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
 
     public async Task<AuthResponse> LoginAsync(string email, string senha)
     {
-        var response = await _httpclient.PostAsJsonAsync("auth/login?useCookies=true", new { email, password = senha });
+        var response = await _httpclient.PostAsJsonAsync("auth/login?useCookies=true", new
+        {
+            email,
+            password = senha
+        });
+
         if (response.IsSuccessStatusCode)
         {
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
             return new AuthResponse{Success = true,};
         }
-        return new AuthResponse { Success = false, Erros = new[] { "Falha ao autenticar" } };
+        return new AuthResponse { Success = false, Erros = ["Falha ao autenticar"] };
     }
 
     public async Task LogoutAsync()

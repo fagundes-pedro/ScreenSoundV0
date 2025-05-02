@@ -42,9 +42,15 @@ public class ScreenSoundContext: IdentityDbContext<PessoaComAcesso, PerfilDeAces
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Musica>()
             .HasMany(c => c.Generos)
             .WithMany(c => c.Musicas);
+
+        modelBuilder.Entity<Musica>()
+            .HasOne(c => c.Artista)
+            .WithMany(c => c.Musicas)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
 }

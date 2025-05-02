@@ -19,7 +19,7 @@ builder.Services.AddScoped<AuthAPI>(sp => (AuthAPI)
 builder.Services.AddScoped<CookieHandler>();
 builder.Services.AddScoped<ArtistaAPI>();
 builder.Services.AddScoped<MusicaAPI>();
-builder.Services.AddScoped<AuthAPI>();
+
 
 builder.Services.AddHttpClient("API",client => {
     client.BaseAddress = new Uri(builder.Configuration["APIServer:Url"]!);
